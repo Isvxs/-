@@ -2,126 +2,136 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Dino 終極綠光計時器</title>
+    <title>DINO 綠 光 災 厄</title>
     <style>
-        @keyframes flash {
-            0% { background-color: #000; }
-            50% { background-color: #003300; }
-            100% { background-color: #000; }
+        :root {
+            --green: #00ff00;
+            --dark: #000;
         }
 
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        @keyframes bg-rotate {
+            from { transform: rotate(0deg) scale(1); }
+            to { transform: rotate(360deg) scale(3); }
         }
 
-        @keyframes pulse {
-            0% { scale: 1; }
-            50% { scale: 1.2; color: #00ff00; }
-            100% { scale: 1; }
+        @keyframes shake-extreme {
+            0% { transform: translate(0,0); filter: hue-rotate(0deg); }
+            20% { transform: translate(-10px, 5px); filter: hue-rotate(90deg); }
+            40% { transform: translate(10px, -5px); filter: hue-rotate(180deg); }
+            60% { transform: translate(-15px, -15px); }
+            80% { transform: translate(15px, 15px); }
+            100% { transform: translate(0,0); }
+        }
+
+        @keyframes invert-flash {
+            0% { filter: invert(0); }
+            95% { filter: invert(0); }
+            96% { filter: invert(1); }
+            100% { filter: invert(0); }
         }
 
         body {
-            background-color: #000;
-            color: #00ff00;
-            overflow: hidden; /* 防止彈幕導致捲軸 */
+            background-color: var(--dark);
+            color: var(--green);
+            margin: 0;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            font-family: "Impact", "Microsoft JhengHei", sans-serif;
-            animation: flash 0.1s infinite; /* 極速閃爍 */
+            font-family: 'Arial Black', "Microsoft JhengHei", sans-serif;
+            animation: invert-flash 0.2s infinite;
         }
 
-        .container {
+        /* 旋轉的綠色背景牆 */
+        .bg-layer {
+            position: fixed;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            opacity: 0.15;
+            z-index: -1;
+            animation: bg-rotate 10s linear infinite;
+            font-size: 5rem;
+        }
+
+        .main-box {
             text-align: center;
-            z-index: 10;
-            animation: shake 0.1s infinite; /* 全力震動 */
+            padding: 40px;
+            border: 10px dashed var(--green);
+            background: rgba(0,0,0,0.8);
+            box-shadow: 0 0 100px var(--green);
+            animation: shake-extreme 0.05s infinite;
         }
 
-        h1 {
-            font-size: 3rem;
-            text-shadow: 0 0 10px #00ff00;
+        .header {
+            font-size: 3.5rem;
+            text-shadow: 0 0 20px var(--green);
+            margin-bottom: 20px;
         }
 
         #timer {
-            font-size: 6rem;
-            margin: 20px 0;
-            animation: pulse 0.5s infinite;
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border: 5px solid #00ff00;
+            font-size: 10rem;
+            line-height: 0.9;
+            color: #fff;
+            text-shadow: 5px 5px 0px #00ff00, -5px -5px 0px #ff0000;
         }
 
-        .danmu {
-            position: fixed;
-            color: #00ff00;
-            font-size: 2rem;
-            white-space: nowrap;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.6;
+        .footer {
+            font-size: 2.5rem;
+            background: #fff;
+            color: #000;
+            margin-top: 30px;
+            display: inline-block;
+            padding: 0 20px;
         }
+
+        .ms-unit { font-size: 4rem; color: #ff0000; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Dino 被綠至今：</h1>
-        <div id="timer">計算中...</div>
-        <h1 style="color: white; background: red;">悲 報 確 定</h1>
+    <div class="bg-layer" id="bg-layer"></div>
+
+    <div class="main-box">
+        <div class="header">DINO 綠 帽 突 入</div>
+        <div id="timer">Loading...</div>
+        <div class="footer">悲 劇 還 在 進 行</div>
     </div>
 
     <script>
-        // 設定起始時間：2026年3月19日
+        // 設定起始日：2026年3月19日
         const startDate = new Date('2026-03-19T00:00:00');
 
-        function updateTimer() {
+        // 生成背景 🦖 牆
+        const bgLayer = document.getElementById('bg-layer');
+        for(let i=0; i<200; i++) {
+            bgLayer.innerHTML += '<div>🦖</div>';
+        }
+
+        function update() {
             const now = new Date();
             const diff = now - startDate;
+            
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            const ms = Math.floor((diff % 1000) / 10); // 顯示毫秒更鬼畜
+            const hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+            const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+            const ms = String(Math.floor((diff % 1000) / 10)).padStart(2, '0');
 
             document.getElementById('timer').innerHTML = 
-                `${days}天 ${hours}:${minutes}:${seconds}.${ms}`;
+                `${days}D<br>${hours}:${minutes}:${seconds}<span class="ms-unit">.${ms}</span>`;
         }
 
-        // 彈幕功能
-        const texts = ["Dino 堅強", "要想生活過得去", "頭上總得帶點綠", "大草原", "愛是一道光", "又過了一秒", "悲哀", "慘", "Green"];
-        function createDanmu() {
-            const div = document.createElement('div');
-            div.className = 'danmu';
-            div.innerText = texts[Math.floor(Math.random() * texts.length)];
-            div.style.top = Math.random() * 100 + 'vh';
-            div.style.left = '100vw';
-            document.body.appendChild(div);
+        // 極速刷新
+        setInterval(update, 16); // 接近 60fps 的刷新率
 
-            let pos = 100;
-            const interval = setInterval(() => {
-                pos -= 2;
-                div.style.left = pos + 'vw';
-                if (pos < -50) {
-                    clearInterval(interval);
-                    div.remove();
-                }
-            }, 20);
-        }
-
-        setInterval(updateTimer, 50); // 更高頻率更新
-        setInterval(createDanmu, 300); // 瘋狂產生彈幕
+        // 隨機改變標題內容
+        const titles = ["綠光籠罩", "DINO 堅強", "要想生活過得去", "帽不可擋", "大草原之主"];
+        setInterval(() => {
+            document.querySelector('.header').innerText = titles[Math.floor(Math.random()*titles.length)];
+        }, 500);
     </script>
 </body>
 </html>
